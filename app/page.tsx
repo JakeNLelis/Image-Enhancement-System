@@ -6,6 +6,8 @@ import { ImageUploader } from "@/components/ImageUploader";
 import { ImageAnalyzer } from "@/components/ImageAnalyzer";
 import { FuzzyEngine } from "@/components/FuzzyEngine";
 import { BeforeAfterComparison } from "@/components/BeforeAfterComparison";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggleDropdown } from "@/components/theme-toggle-dropdown";
 import { ImageMetrics, InferenceResult } from "@/types/fuzzy";
 import { applyEnhancements } from "@/lib/imageProcessing";
 import { analyzeImage } from "@/lib/imageAnalysis";
@@ -71,6 +73,17 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Theme Toggle - Fixed position, mobile-friendly */}
+      <div className="fixed top-4 right-4 z-40">
+        {/* Simple toggle for mobile, dropdown for desktop */}
+        <div className="block sm:hidden">
+          <ThemeToggle />
+        </div>
+        <div className="hidden sm:block">
+          <ThemeToggleDropdown />
+        </div>
+      </div>
+
       <div className="container mx-auto py-4 md:py-8 px-4">
         <div className="mb-6 md:mb-8 text-center">
           <h1 className="text-2xl md:text-4xl font-bold mb-2">
@@ -222,8 +235,8 @@ export default function Home() {
         </Tabs>
 
         {isProcessing && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-            <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg max-w-sm mx-auto">
+          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 px-4">
+            <div className="bg-background border p-4 md:p-6 rounded-lg shadow-lg max-w-sm mx-auto">
               <div className="flex items-center space-x-3">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                 <span className="text-sm md:text-base">

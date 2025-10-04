@@ -31,6 +31,12 @@ export function FuzzyEngine({
   const processedMetricsRef = useRef<string | null>(null);
   const inferenceCache = useRef<Map<string, InferenceResult>>(new Map());
   const lastClearKeyRef = useRef<string>("");
+  const onInferenceCompleteRef = useRef(onInferenceComplete);
+
+  // Keep the ref updated with the latest callback
+  useEffect(() => {
+    onInferenceCompleteRef.current = onInferenceComplete;
+  }, [onInferenceComplete]);
 
   // Clear cache when clearCacheKey changes (e.g., new image uploaded)
   useEffect(() => {
@@ -41,22 +47,15 @@ export function FuzzyEngine({
     }
   }, [clearCacheKey]);
 
-  // Memoize the inference computation to avoid re-running for same metrics
+  // Memoize the inference computation for new metrics only
   const computeInference = useCallback(
     async (metricsToProcess: ImageMetrics): Promise<InferenceResult> => {
       const metricsKey = createMetricsKey(metricsToProcess);
 
-      // Check if we already have this result cached
-      if (inferenceCache.current.has(metricsKey)) {
-        return inferenceCache.current.get(metricsKey)!;
-      }
-
-      // Only show loading animation if this is a new computation
-      if (processedMetricsRef.current !== metricsKey) {
-        setIsProcessing(true);
-        // Add a small delay for visual feedback
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      }
+      // Show loading animation for new computation
+      setIsProcessing(true);
+      // Add a small delay for visual feedback
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const result = mamdaniInference(metricsToProcess);
 
@@ -82,15 +81,16 @@ export function FuzzyEngine({
       // If we already processed these exact metrics, use cached result
       if (inferenceCache.current.has(metricsKey)) {
         const cachedResult = inferenceCache.current.get(metricsKey)!;
+        setIsProcessing(false); // Ensure loading state is cleared
         setInferenceResult(cachedResult);
-        onInferenceComplete(cachedResult);
+        onInferenceCompleteRef.current(cachedResult);
         return;
       }
 
       try {
         const result = await computeInference(metrics);
         setInferenceResult(result);
-        onInferenceComplete(result);
+        onInferenceCompleteRef.current(result);
       } catch (error) {
         console.error("Fuzzy inference failed:", error);
         setIsProcessing(false);
@@ -98,7 +98,7 @@ export function FuzzyEngine({
     };
 
     runInference();
-  }, [metrics, onInferenceComplete, computeInference]);
+  }, [metrics, computeInference]); // Removed onInferenceComplete to prevent re-runs
 
   if (!metrics) {
     return (
