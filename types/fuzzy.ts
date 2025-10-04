@@ -1,20 +1,16 @@
-// Fuzzy Logic System Type Definitions
-
-// Basic Types
 export interface Point {
   x: number;
   y: number;
 }
 
-// Membership Function Types
 export interface TriangularMF {
   type: "triangular";
-  points: [number, number, number]; // [a, b, c] where membership is 0 at a, 1 at b, 0 at c
+  points: [number, number, number];
 }
 
 export interface TrapezoidalMF {
   type: "trapezoidal";
-  points: [number, number, number, number]; // [a, b, c, d] where membership is 0 at a, rises to 1 at b, stays 1 until c, falls to 0 at d
+  points: [number, number, number, number];
 }
 
 export type MembershipFunction = TriangularMF | TrapezoidalMF;
@@ -22,7 +18,7 @@ export type MembershipFunction = TriangularMF | TrapezoidalMF;
 // Linguistic Variable Types
 export interface LinguisticVariable {
   name: string;
-  universe: [number, number]; // [min, max]
+  universe: [number, number];
   terms: Record<string, MembershipFunction>;
 }
 
@@ -108,17 +104,17 @@ export interface AggregatedOutput {
 
 // Image Analysis Types
 export interface ImageMetrics {
-  brightness: number; // 0-255
-  contrast: number; // 0-100
-  sharpness: number; // 0-100
-  noise: number; // 0-100
+  brightness: number;
+  contrast: number;
+  sharpness: number;
+  noise: number;
 }
 
 export interface EnhancementParameters {
-  brightnessAdj: number; // -100 to +100
-  contrastAdj: number; // 0.5 to 2.0
-  sharpen: number; // 0-100
-  denoise: number; // 0-100
+  brightnessAdj: number;
+  contrastAdj: number;
+  sharpen: number;
+  denoise: number;
 }
 
 // Fuzzification Types
