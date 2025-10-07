@@ -27,7 +27,6 @@ export default function Home() {
   );
   const [inferenceResult, setInferenceResult] =
     useState<InferenceResult | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [cacheKey, setCacheKey] = useState<string>("");
 
   const handleImageUpload = useCallback((imageData: ImageData) => {
@@ -48,7 +47,6 @@ export default function Home() {
     async (result: InferenceResult) => {
       if (!originalImageData) return;
 
-      setIsProcessing(true);
       setInferenceResult(result);
 
       try {
@@ -64,8 +62,6 @@ export default function Home() {
         setEnhancedMetrics(enhancedMetrics);
       } catch (error) {
         console.error("Enhancement failed:", error);
-      } finally {
-        setIsProcessing(false);
       }
     },
     [originalImageData]
@@ -127,10 +123,7 @@ export default function Home() {
 
           <TabsContent value="upload" className="space-y-4 md:space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-              <ImageUploader
-                onImageUpload={handleImageUpload}
-                isProcessing={isProcessing}
-              />
+              <ImageUploader onImageUpload={handleImageUpload} />
               <ImageAnalyzer
                 imageData={originalImageData}
                 onAnalysisComplete={handleAnalysisComplete}
@@ -233,19 +226,6 @@ export default function Home() {
             />
           </TabsContent>
         </Tabs>
-
-        {isProcessing && (
-          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 px-4">
-            <div className="bg-background border p-4 md:p-6 rounded-lg shadow-lg max-w-sm mx-auto">
-              <div className="flex items-center space-x-3">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                <span className="text-sm md:text-base">
-                  Processing image enhancement...
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -8,16 +8,14 @@ import { VisualizationDashboard } from "./VisualizationDashboard";
 import { FuzzyEngineProps, InferenceResult, ImageMetrics } from "@/types/fuzzy";
 import { mamdaniInference } from "@/lib/fuzzyLogic";
 
-// Helper function to create a unique key for metrics
 function createMetricsKey(metrics: ImageMetrics): string {
   return `${metrics.brightness.toFixed(2)}-${metrics.contrast.toFixed(
     2
   )}-${metrics.sharpness.toFixed(2)}-${metrics.noise.toFixed(2)}`;
 }
 
-// Extended props to include cache clearing functionality
 interface ExtendedFuzzyEngineProps extends FuzzyEngineProps {
-  clearCacheKey?: string; // When this changes, cache will be cleared
+  clearCacheKey?: string;
 }
 
 export function FuzzyEngine({
@@ -33,12 +31,10 @@ export function FuzzyEngine({
   const lastClearKeyRef = useRef<string>("");
   const onInferenceCompleteRef = useRef(onInferenceComplete);
 
-  // Keep the ref updated with the latest callback
   useEffect(() => {
     onInferenceCompleteRef.current = onInferenceComplete;
   }, [onInferenceComplete]);
 
-  // Clear cache when clearCacheKey changes (e.g., new image uploaded)
   useEffect(() => {
     if (clearCacheKey && clearCacheKey !== lastClearKeyRef.current) {
       inferenceCache.current.clear();
@@ -47,19 +43,15 @@ export function FuzzyEngine({
     }
   }, [clearCacheKey]);
 
-  // Memoize the inference computation for new metrics only
   const computeInference = useCallback(
     async (metricsToProcess: ImageMetrics): Promise<InferenceResult> => {
       const metricsKey = createMetricsKey(metricsToProcess);
 
-      // Show loading animation for new computation
       setIsProcessing(true);
-      // Add a small delay for visual feedback
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       const result = mamdaniInference(metricsToProcess);
 
-      // Cache the result
       inferenceCache.current.set(metricsKey, result);
       processedMetricsRef.current = metricsKey;
 
@@ -78,10 +70,9 @@ export function FuzzyEngine({
     const runInference = async () => {
       const metricsKey = createMetricsKey(metrics);
 
-      // If we already processed these exact metrics, use cached result
       if (inferenceCache.current.has(metricsKey)) {
         const cachedResult = inferenceCache.current.get(metricsKey)!;
-        setIsProcessing(false); // Ensure loading state is cleared
+        setIsProcessing(false);
         setInferenceResult(cachedResult);
         onInferenceCompleteRef.current(cachedResult);
         return;
@@ -98,7 +89,7 @@ export function FuzzyEngine({
     };
 
     runInference();
-  }, [metrics, computeInference]); // Removed onInferenceComplete to prevent re-runs
+  }, [metrics, computeInference]);
 
   if (!metrics) {
     return (
@@ -119,37 +110,45 @@ export function FuzzyEngine({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Processing Fuzzy Logic</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+            Processing Fuzzy Logic
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Fuzzification</span>
-                <span>25%</span>
-              </div>
-              <Progress value={25} />
+            <div className="text-center text-sm text-muted-foreground mb-4">
+              Analyzing image metrics and applying fuzzy inference rules...
             </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Rule Evaluation</span>
-                <span>50%</span>
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Fuzzification</span>
+                  <span className="text-blue-600">25%</span>
+                </div>
+                <Progress value={25} className="h-2" />
               </div>
-              <Progress value={50} />
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Aggregation</span>
-                <span>75%</span>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Rule Evaluation</span>
+                  <span className="text-green-600">50%</span>
+                </div>
+                <Progress value={50} className="h-2" />
               </div>
-              <Progress value={75} />
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Defuzzification</span>
-                <span>100%</span>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Aggregation</span>
+                  <span className="text-orange-600">75%</span>
+                </div>
+                <Progress value={75} className="h-2" />
               </div>
-              <Progress value={100} />
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Defuzzification</span>
+                  <span className="text-purple-600">100%</span>
+                </div>
+                <Progress value={100} className="h-2" />
+              </div>
             </div>
           </div>
         </CardContent>
